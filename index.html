@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cadastro de Usuário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+
+<div class="container mt-3 p-3" style="background-color: #fafafa; border: 1px solid #fff; border-radius: 10px">
+    <h5 class="mb-3">Cadastro de Usuários</h5>
+
+    <div class="alert alert-success text-success" role="alert" id="success_register" hidden=""></div>
+
+    <div class="alert alert-danger text-danger" role="alert" id="error_register" hidden=""></div>
+        <input style="display: none" id="id" name="id" hidden="">
+        <div>
+            <label for="name" class="form-label">Nome</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Informe seu nome">
+            <span id="statusName"></span>
+        </div>
+
+        <div>
+            <label for="password" class="form-label mt-2">Email</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="Informe seu email">
+            <span id="statusEmail"></span>
+        </div>
+
+
+        <div class="row mt-2">
+            <div class="col-6">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" id="password" name="name" class="form-control" placeholder="Informe sua senha">
+                <span id="statusPassword1"></span>
+            </div>
+
+            <div class="col-6">
+                <label for="password" class="form-label">Confirmar senha</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                       placeholder="Informe sua senha">
+                <span id="statusPassword2"></span>
+            </div>
+        </div>
+
+        <button  class="btn btn-success mt-3" id="register">Cadastrar</button>
+        <button class="btn btn-success mt-3" id="edit" hidden="">Editar</button>
+</div>
+
+<div class="container mt-3 p-3" style="">
+
+    <div style="display: flex; justify-content: flex-end;">
+        <button class="btn btn-primary mt-5" onclick="window.location.href='/'"> Atualizar</button>
+    </div>
+
+    <table class="table mt-2" id="table">
+        <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th style="width: 500px" scope="col">Nome</th>
+            <th style="width: 300px" scope="col">Email</th>
+            <th style="width: 200px" scope="col">Senha</th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody class="table-group-divider" id="tbody">
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+<script src="assets/js/jquery/index.js"></script>
+<script src="assets/js/index.js"></script>
+<script>
+
+    $(document).ready(function () {
+        $('#tbody').on('click', '.btn_remove', function() {
+            var id = $(this).closest('tr').find('td:first').text();
+            $(this).closest('tr').find('td:first').text();
+
+            $.ajax({
+                url: "../../src/Delete.php",
+                method: 'POST',
+                data: {
+                    id
+                },
+                dataType: 'JSON',
+                async: true,
+            }).done(function (result) {
+                $("#id").val("");
+                $("#name").val("");
+                $("#email").val("");
+                $("#password").val("");
+                $("#confirmPassword").val("");
+
+                if (result.error) {
+                    $("#success_register").attr("hidden", true);
+                    $("#success_register").html()
+
+                    $("#error_register").attr("hidden", false);
+                    $("#error_register").html(result.error)
+                    setTimeout(function () {
+                        $("#error_register").attr("hidden", true);
+                    }, 5000);
+                }
+
+                if (result.success) {
+                    $("#error_register").attr("hidden", true);
+                    $("#error_register").html()
+
+                    $("#success_register").attr("hidden", false);
+                    $("#success_register").html(result.success)
+                    setTimeout(function () {
+                        $("#success_register").attr("hidden", true);
+                    }, 5000);
+
+                }
+            })
+        });
+
+        $('#tbody').on('click', '.btn_edit', function() {
+            var dataTable = $(this).closest('tr').find('td:not(:last-child)').map(function (){
+                return $(this).text().trim();
+            });
+            $("#id").val(dataTable[0])
+            $("#name").val(dataTable[1])
+            $("#email").val(dataTable[2])
+            $("#password").val(dataTable[3])
+            $("#confirmPassword").val(dataTable[3])
+
+            $("#edit").attr("hidden", false);
+            $("#register").attr("hidden", true);
+        });
+
+        $("#edit").on("click",function (){
+            const id = $("#id").val();
+            const name = $("#name").val();
+            const email = $("#email").val();
+            const password = $("#password").val();
+            const confirmPassword = $("#confirmPassword").val();
+
+            const data = {
+                id,
+                name,
+                email,
+                password,
+                confirmPassword
+            }
+
+            $.ajax({
+                url: "src/Edit.php",
+                method: 'POST',
+                data: data,
+                dataType: "JSON"
+            }).done(function (result) {
+                if (result.error) {
+                    $("#success_register").attr("hidden", true);
+                    $("#success_register").html()
+
+                    $("#error_register").attr("hidden", false);
+                    $("#error_register").html(result.error)
+                    setTimeout(function () {
+                        $("#error_register").attr("hidden", true);
+                    }, 5000);
+                }
+
+                if (result.success) {
+                    $("#error_register").attr("hidden", true);
+                    $("#error_register").html()
+
+                    $("#success_register").attr("hidden", false);
+                    $("#success_register").html(result.success)
+                    setTimeout(function () {
+                        $("#success_register").attr("hidden", true);
+                    }, 5000);
+                }
+            })
+        })
+
+    });
+
+</script>
+</body>
+</html>
